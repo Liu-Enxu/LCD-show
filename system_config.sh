@@ -16,6 +16,7 @@ else
 hardware_model=255
 fi
 
+echo "Ignore wayland error, wayland for labwc only"
 sudo raspi-config nonint do_wayland W1
 if [ -f /boot/firmware/config.txt ]; then
 sudo ln -sf /boot/firmware/config.txt /boot/config.txt
@@ -41,4 +42,8 @@ sudo cp -rf ./boot/config-nomal-12.10-64.txt ./boot/config.txt.bak
 fi
 fi
 
-
+echo "Load touch input config file"
+if [ ! -d /usr/share/X11/xorg.conf.d/ ]; then
+sudo mkdir -p /usr/share/X11/xorg.conf.d/
+fi
+sudo cp -rf ./usr/40-libinput.conf-InvertX /usr/share/X11/xorg.conf.d/40-libinput.conf
