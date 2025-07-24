@@ -25,7 +25,7 @@ sudo echo "hdmi_force_hotplug=1" >> ./boot/config.txt.bak
 sudo echo "dtparam=i2c_arm=on" >> ./boot/config.txt.bak
 sudo echo "dtparam=spi=on" >> ./boot/config.txt.bak
 sudo echo "enable_uart=1" >> ./boot/config.txt.bak
-sudo echo "dtoverlay=mhs35:rotate=90" >> ./boot/config.txt.bak
+sudo echo "dtoverlay=mhs35:rotate=90,swapxy=1" >> ./boot/config.txt.bak
 sudo echo "hdmi_group=2" >> ./boot/config.txt.bak
 sudo echo "hdmi_mode=1" >> ./boot/config.txt.bak
 sudo echo "hdmi_mode=87" >> ./boot/config.txt.bak
@@ -52,11 +52,12 @@ echo "gpio:resistance:mhs35:90:480:320" > ./.have_installed
 #fi
 sudo pacman -Syu
 
-#FBCP install
+#FBCP install # no usable fbcp for rpi5 for now!
+echo "No available fbcp for rpi5-arch for now, don't install wget and ignore the errors!"
 wget --spider -q -o /dev/null --tries=1 -T 10 https://cmake.org/
 if [ $? -eq 0 ]; then
 #sudo apt-get install cmake libraspberrypi-dev -y 2> error_output.txt
-sudo pacman -S cmake
+sudo pacman -S cmake --noconfirm # no need for this but good to have
 #result=`cat ./error_output.txt`
 #echo -e "\033[31m$result\033[0m"
 #grep -q "^E:" ./error_output.txt
@@ -65,7 +66,7 @@ if [ $? -eq 0 ]; then
 sudo rm -rf rpi-fbcp
 wget --spider -q -o /dev/null --tries=1 -T 10 https://github.com
 if [ $? -eq 0 ]; then
-sudo git clone https://github.com/tasanakorn/rpi-fbcp
+sudo git clone https://github.com/tasanakorn/rpi-fbcp.git
 if [ $? -ne 0 ]; then
 echo "download fbcp failed, copy native fbcp!!!"
 sudo cp -r ./usr/rpi-fbcp .
@@ -76,7 +77,7 @@ sudo cp -r ./usr/rpi-fbcp .
 fi
 sudo mkdir ./rpi-fbcp/build
 cd ./rpi-fbcp/build/
-sudo cmake ..
+sudo cmake .. -B .
 sudo make
 sudo install fbcp /usr/local/bin/fbcp
 cd - > /dev/null
@@ -92,6 +93,7 @@ echo "install cmake error!!!!"
 fi
 else
 echo "bad network, can't install cmake!!!"
+echo "Correction: skipped all the fbcp lines!"
 fi
 
 #evdev install
@@ -108,7 +110,9 @@ if test $version -lt 2017;then
 echo "reboot"
 else
 echo "need to update touch configuration"
+echo "P.S.: no need for this, ignore wget & dpkg error!"
 wget --spider -q -o /dev/null --tries=1 -T 10 http://mirrors.zju.edu.cn/raspbian/raspbian
+
 if [ $? -ne 0 ]; then
 input_result=1
 else
@@ -118,6 +122,7 @@ if [ $? -ne 0 ]; then
 input_result=1
 fi
 fi
+
 if [ $input_result -eq 1 ]; then 
 if [ $hardware_arch -eq 32 ]; then
 sudo dpkg -i -B ./xserver-xorg-input-evdev_1%3a2.10.6-1+b1_armhf.deb 2> error_output.txt
@@ -125,6 +130,7 @@ elif [ $hardware_arch -eq 64 ]; then
 sudo dpkg -i -B ./xserver-xorg-input-evdev_1%3a2.10.6-2_arm64.deb 2> error_output.txt
 fi
 fi
+
 result=`cat ./error_output.txt`
 echo -e "\033[31m$result\033[0m"
 grep -q "error:" ./error_output.txt && exit
