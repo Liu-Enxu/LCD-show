@@ -1,7 +1,7 @@
 #!/bin/bash
 
 big_version=`lsb_release -r | awk -F ' '  '{printf $NF}'`
-deb_version=`cat /etc/debian_version | tr -d '\n'`
+#deb_version=`cat /etc/debian_version | tr -d '\n'`
 hw_result=`tr -d '\0' < /proc/device-tree/model`
 
 if [ $(getconf WORD_BIT) = '32' ] && [ $(getconf LONG_BIT) = '64' ] ; then
